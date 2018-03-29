@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#region Using
+using System.Collections.Generic;
+#endregion
 
 namespace WebAdvanced.Sitemap.Models {
     public class SitemapNode {
@@ -8,8 +10,10 @@ namespace WebAdvanced.Sitemap.Models {
             Children = new Dictionary<string, SitemapNode>();
         }
 
+        #region Properties
+        public Dictionary<string, SitemapNode> Children { get; set; }
         public string Title { get; set; }
         public string Url { get; set; }
-        public Dictionary<string, SitemapNode> Children { get; set; }
+        #endregion
     }
 }

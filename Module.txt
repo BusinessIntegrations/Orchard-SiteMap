@@ -1,13 +1,13 @@
-Name: Advanced Sitemap
+Name: BI Sitemap
 AntiForgery: enabled
 Author: WebAdvanced
-Website: https://github.com/webadvanced/Orchard-SiteMap/wiki
-Version: 1.6.0
-OrchardVersion: 1.7
-Description: Provides a highly configurable XML and HTML sitemap.
+Website: https://github.com/BusinessIntegrations/Orchard-SiteMap
+Version: 2.0.247
+OrchardVersion: 1.10.2
+Tags: Sitemap, SEO, Navigation
+Description: Provides a highly configurable XML and HTML sitemap. Modified by Business Integrations.
 Features:
     WebAdvanced.Sitemap:
-        Description: Provides a highly configurable XML and HTML sitemap.
-		Name: Advanced Sitemap
+		Name: BI Sitemap
 		Category: Navigation
-        Dependencies: Orchard.jQuery
+		Dependencies: Orchard.Autoroute

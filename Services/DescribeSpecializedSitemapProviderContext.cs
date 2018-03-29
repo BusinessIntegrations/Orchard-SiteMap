@@ -1,20 +1,25 @@
-﻿using System.Collections.Generic;
+﻿#region Using
+using System.Collections.Generic;
+#endregion
 
 namespace WebAdvanced.Sitemap.Services {
     public class DescribeSpecializedSitemapProviderContext {
-        internal Dictionary<string, DescribeSpecializedSitemapFor> Describes { get; private set; }
-
         public DescribeSpecializedSitemapProviderContext() {
             Describes = new Dictionary<string, DescribeSpecializedSitemapFor>();
         }
 
+        #region Properties
+        internal Dictionary<string, DescribeSpecializedSitemapFor> Describes { get; }
+        #endregion
+
+        #region Methods
         public DescribeSpecializedSitemapFor For(string namespacePrefix) {
-            DescribeSpecializedSitemapFor describeFor;
-            if (!Describes.TryGetValue(namespacePrefix, out describeFor)) {
+            if (!Describes.TryGetValue(namespacePrefix, out var describeFor)) {
                 describeFor = new DescribeSpecializedSitemapFor(namespacePrefix);
                 Describes[namespacePrefix] = describeFor;
             }
             return describeFor;
         }
+        #endregion
     }
 }

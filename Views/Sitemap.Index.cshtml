@@ -1,10 +1,18 @@
 ﻿@{
-    Layout.Title = T("Sitemap").ToString();
-    int col = 0;
+    Layout.Title = T("Sitemap")
+        .ToString();
     Style.Include("WebAdvanced.Sitemap.Display.css");
 }
-<div class="sitemap">
-    <div class="content group">
-        @DisplayChildren(Model.Columns)
-    </div>
+<h1>Sitemap</h1>
+<div class="sitemap row">
+    @if (Model.Columns.Count > 0) {
+        <div class="content group">
+            @DisplayChildren(Model.Columns)
+        </div>
+    }
+    else {
+        <div class="col-sm-12">
+            <h4>@T("Sorry, there are no entries to show.")</h4>
+        </div>
+    }
 </div>

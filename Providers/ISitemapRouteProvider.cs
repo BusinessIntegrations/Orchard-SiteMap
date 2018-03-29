@@ -1,14 +1,18 @@
-﻿using System;
+﻿#region Using
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Orchard;
 using WebAdvanced.Sitemap.Models;
+#endregion
 
 namespace WebAdvanced.Sitemap.Providers {
     public interface ISitemapRouteProvider : IDependency {
+        #region Properties
+        int Priority { get; }
+        #endregion
+
+        #region Methods
         IEnumerable<SitemapRoute> GetDisplayRoutes();
         IEnumerable<SitemapRoute> GetXmlRoutes();
-        int Priority { get; }
+        #endregion
     }
 }

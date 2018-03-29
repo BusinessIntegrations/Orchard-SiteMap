@@ -1,24 +1,23 @@
-﻿using System;
+﻿#region Using
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Orchard.Mvc.Routes;
+#endregion
 
 namespace WebAdvanced.Sitemap {
     public class Routes : IRouteProvider {
-
+        #region IRouteProvider Members
         public void GetRoutes(ICollection<RouteDescriptor> routes) {
-            foreach (var routeDescriptor in GetRoutes())
+            foreach (var routeDescriptor in GetRoutes()) {
                 routes.Add(routeDescriptor);
+            }
         }
 
         public IEnumerable<RouteDescriptor> GetRoutes() {
             return new[] {
                 new RouteDescriptor {
-                    Route = new Route(
-                        "Admin/Sitemap/Indexing",
+                    Route = new Route("Admin/Sitemap/Indexing",
                         new RouteValueDictionary {
                             {"area", "WebAdvanced.Sitemap"},
                             {"controller", "Admin"},
@@ -31,8 +30,7 @@ namespace WebAdvanced.Sitemap {
                         new MvcRouteHandler())
                 },
                 new RouteDescriptor {
-                    Route = new Route(
-                        "Admin/Sitemap/Display",
+                    Route = new Route("Admin/Sitemap/Display",
                         new RouteValueDictionary {
                             {"area", "WebAdvanced.Sitemap"},
                             {"controller", "Admin"},
@@ -45,8 +43,7 @@ namespace WebAdvanced.Sitemap {
                         new MvcRouteHandler())
                 },
                 new RouteDescriptor {
-                    Route = new Route(
-                        "Admin/Sitemap/GetCustomRouteForm",
+                    Route = new Route("Admin/Sitemap/GetCustomRouteForm",
                         new RouteValueDictionary {
                             {"area", "WebAdvanced.Sitemap"},
                             {"controller", "Admin"},
@@ -59,8 +56,7 @@ namespace WebAdvanced.Sitemap {
                         new MvcRouteHandler())
                 },
                 new RouteDescriptor {
-                    Route = new Route(
-                        "sitemap",
+                    Route = new Route("sitemap",
                         new RouteValueDictionary {
                             {"area", "WebAdvanced.Sitemap"},
                             {"controller", "Home"},
@@ -73,8 +69,20 @@ namespace WebAdvanced.Sitemap {
                         new MvcRouteHandler())
                 },
                 new RouteDescriptor {
-                    Route = new Route(
-                        "sitemap.xml",
+                    Route = new Route("sitemap.xml",
+                        new RouteValueDictionary {
+                            {"area", "WebAdvanced.Sitemap"},
+                            {"controller", "Home"},
+                            {"action", "Xml"}
+                        },
+                        new RouteValueDictionary(),
+                        new RouteValueDictionary {
+                            {"area", "WebAdvanced.Sitemap"}
+                        },
+                        new MvcRouteHandler())
+                },
+                new RouteDescriptor {
+                    Route = new Route("googlesitemap.xml",
                         new RouteValueDictionary {
                             {"area", "WebAdvanced.Sitemap"},
                             {"controller", "Home"},
@@ -88,5 +96,6 @@ namespace WebAdvanced.Sitemap {
                 }
             };
         }
+        #endregion
     }
 }

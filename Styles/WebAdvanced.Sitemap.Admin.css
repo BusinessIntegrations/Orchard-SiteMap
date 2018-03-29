@@ -18,16 +18,16 @@
         width: 9px;
         height: 9px;
         background: url("plus-minus.png") no-repeat;
-        background-position: 0px 0px;
+        background-position: 0 0;
         float: left;
-        text-indent: -9999;
+        text-indent: -9999px;
         overflow: hidden;
         position: absolute;
         top: 12px;
         right: 40px;
     }
-    .levels-increase a { background-position: 0px -9px;right: 10px;}
-    .levels-decrease a:hover{background-position: -9px 0px;}
+    .levels-increase a { background-position: 0 -9px;right: 10px;}
+    .levels-decrease a:hover{background-position: -9px 0;}
     .levels-increase a:hover{background-position: -9px -9px;}
 
 
@@ -56,8 +56,7 @@
 .ui-helper-clearfix:after {
     clear: both;
 }
-.ui-helper-clearfix {
-}
+
 .ui-helper-zfix {
     height: 100%;
     left: 0;
@@ -87,9 +86,9 @@
     background-color: #f3f4f5;
     border: 1px solid #FFF;
     color: #333333;
-    -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.6);
-    -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.6);
-    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.6); 
+    -webkit-box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.6);
+    -moz-box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.6); 
 }
 .ui-sortable-placeholder { border: 1px dotted black; visibility: visible !important; background-color:transparent;}
 .ui-widget-content.ui-sortable-placeholder {

@@ -1,18 +1,26 @@
 ﻿@model WebAdvanced.Sitemap.ViewModels.DisplaySettingsPageModel
 @{
-    Script.Require("jQuery").AtFoot();
-    Script.Include("jquery-ui-1.10.0.custom.min.js");
+    Script.Require("jQuery")
+        .AtFoot();
+    Script.Require("jQueryUI")
+        .AtFoot();
     Script.Include("admin.displaysettings.js");
     Style.Include("WebAdvanced.Sitemap.Admin.css");
-    
-    var disabledItems = Model.Routes.Where(r => !r.Active).ToList();
-    var enabledItems = Model.Routes.Where(r => r.Active).ToList();
-    var colItems1 = enabledItems.Where(i => i.DisplayColumn <= 1).OrderBy(i => i.Weight).ToList();
-    var colItems2 = enabledItems.Where(i => i.DisplayColumn == 2).OrderBy(i => i.Weight).ToList();
-    var colItems3 = enabledItems.Where(i => i.DisplayColumn == 3).OrderBy(i => i.Weight).ToList();
-    
-    Layout.Title = T("Sitemap Display Settings").ToString();
-    
+    var disabledItems = Model.Routes.Where(r => !r.Active)
+        .ToList();
+    var enabledItems = Model.Routes.Where(r => r.Active)
+        .ToList();
+    var colItems1 = enabledItems.Where(i => i.DisplayColumn <= 1)
+        .OrderBy(i => i.Weight)
+        .ToList();
+    var colItems2 = enabledItems.Where(i => i.DisplayColumn == 2)
+        .OrderBy(i => i.Weight)
+        .ToList();
+    var colItems3 = enabledItems.Where(i => i.DisplayColumn == 3)
+        .OrderBy(i => i.Weight)
+        .ToList();
+    Layout.Title = T("Sitemap Display Settings")
+        .ToString();
 }
 <p>Position route groups within the Active Routes columns to set where they will appear on the sitemap page.</p>
 <hr/>
@@ -21,7 +29,9 @@
         <legend>Disabled Routes</legend>
         <div class="disabled-items">
             @foreach (var item in disabledItems) {
-                @Html.DisplayFor(m => item, new { enabled = false })
+                @Html.DisplayFor(m => item, new {
+                    enabled = false
+                })
             }
         </div>
     </fieldset>
@@ -32,19 +42,25 @@
             <div id="col-1" class="column">
                 <div class="column-header">Column 1</div>
                 @foreach (var item in colItems1) {
-                    @Html.DisplayFor(m => item, new { enabled = true })
+                    @Html.DisplayFor(m => item, new {
+                        enabled = true
+                    })
                 }
             </div>
             <div id="col-2" class="column">
-                <div class="column-header">Column 1</div>
+                <div class="column-header">Column 2</div>
                 @foreach (var item in colItems2) {
-                    @Html.DisplayFor(m => item, new { enabled = true })
+                    @Html.DisplayFor(m => item, new {
+                        enabled = true
+                    })
                 }
             </div>
             <div id="col-3" class="column">
-                <div class="column-header">Column 1</div>
+                <div class="column-header">Column 3</div>
                 @foreach (var item in colItems3) {
-                    @Html.DisplayFor(m => item, new { enabled = true })
+                    @Html.DisplayFor(m => item, new {
+                        enabled = true
+                    })
                 }
             </div>
         </div>

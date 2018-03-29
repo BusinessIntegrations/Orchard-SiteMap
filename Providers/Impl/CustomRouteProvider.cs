@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#region Using
+using System.Collections.Generic;
 using System.Linq;
 using Orchard.Data;
-using WebAdvanced.Sitemap.Models;
 using WebAdvanced.Sitemap.Extensions;
+using WebAdvanced.Sitemap.Models;
+#endregion
 
 namespace WebAdvanced.Sitemap.Providers.Impl {
     public class CustomRouteProvider : ISitemapRouteProvider {
@@ -12,25 +14,28 @@ namespace WebAdvanced.Sitemap.Providers.Impl {
             _customRoutes = customRoutes;
         }
 
+        #region ISitemapRouteProvider Members
         public IEnumerable<SitemapRoute> GetDisplayRoutes() {
-            return _customRoutes
-                .Fetch(q => q.IndexForDisplay)
-                .Select(r => new SitemapRoute {Url = r.Url, Title = r.Url.UrlToTitle()})
+            return _customRoutes.Fetch(q => q.IndexForDisplay)
+                .Select(r => new SitemapRoute {
+                    Url = r.Url,
+                    Title = r.Url.UrlToTitle()
+                })
                 .AsEnumerable();
         }
 
         public IEnumerable<SitemapRoute> GetXmlRoutes() {
-            return _customRoutes
-                .Fetch(q => q.IndexForXml)
+            return _customRoutes.Fetch(q => q.IndexForXml)
                 .Select(r => new SitemapRoute {
-                    Url = r.Url, 
-                    Title = r.Url.UrlToTitle(), 
-                    Priority = r.Priority, 
-                    UpdateFrequency = r.UpdateFrequency})
+                    Url = r.Url,
+                    Title = r.Url.UrlToTitle(),
+                    Priority = r.Priority,
+                    UpdateFrequency = r.UpdateFrequency
+                })
                 .AsEnumerable();
         }
-        
-        public int Priority { get { return 20; } }
-        
+
+        public int Priority => 20;
+        #endregion
     }
 }

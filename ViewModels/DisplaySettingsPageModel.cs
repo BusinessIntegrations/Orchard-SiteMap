@@ -1,11 +1,12 @@
-﻿using System;
+﻿#region Using
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+#endregion
 
 namespace WebAdvanced.Sitemap.ViewModels {
     public class DisplaySettingsPageModel {
-        public List<RouteSettingsModel> Routes { get; set; }
+        #region Properties
         public bool AutoLayout { get; set; }
+        public List<RouteSettingsModel> Routes { get; set; }
+        #endregion
     }
 }

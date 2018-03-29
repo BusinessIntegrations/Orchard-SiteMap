@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
+﻿#region Using
+using System.Collections.Generic;
 using System.Xml.Linq;
 using Orchard;
 using WebAdvanced.Sitemap.Models;
 using WebAdvanced.Sitemap.ViewModels;
+#endregion
 
 namespace WebAdvanced.Sitemap.Services {
     public interface IAdvancedSitemapService : IDependency {
-        void SetIndexSettings(IEnumerable<IndexSettingsModel> settings);
-        IEnumerable<IndexSettingsModel> GetIndexSettings();
-
-        void SetRoutes(IEnumerable<RouteSettingsModel> settings);
-        IEnumerable<RouteSettingsModel> GetRoutes();
-
-        void SetCustomRoutes(IEnumerable<CustomRouteModel> settings);
-        IEnumerable<CustomRouteModel> GetCustomRoutes();
-
+        #region Methods
         void DeleteCustomRoute(string url);
-
-        SitemapNode GetSitemapRoot();
+        IEnumerable<CustomRouteModel> GetCustomRoutes();
+        IEnumerable<IndexSettingsModel> GetIndexSettings();
+        IEnumerable<RouteSettingsModel> GetRoutes();
         XDocument GetSitemapDocument();
+        SitemapNode GetSitemapRoot();
+        void SetCustomRoutes(IEnumerable<CustomRouteModel> settings);
+        void SetIndexSettings(IEnumerable<IndexSettingsModel> settings);
+        void SetRoutes(IEnumerable<RouteSettingsModel> settings);
+        #endregion
     }
 }

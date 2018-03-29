@@ -1,15 +1,20 @@
 ﻿@using System.Text.RegularExpressions
 @functions {
-    bool IsAbsolute(string url) {
+
+    public static bool IsAbsolute(string url) {
         return Regex.IsMatch(url, @"^.+://.*$");
     }
+
 }
 <div class="item-group">
     @if (Model.Url == null) {
-        <h2>@Model.Title</h2>
+        <h4>@Model.Title</h4>
     }
     else {
-        <h2>@Html.Link((string)Model.Title, IsAbsolute(Model.Url as string) ? (string)Model.Url : Url.Content("~/" + (string)Model.Url))</h2>
+        <h4>
+            @Html.Link((string) Model.Title, IsAbsolute(Model.Url as string)
+                ? (string) Model.Url
+                : Url.Content("~/" + (string) Model.Url))</h4>
     }
 
     @if (Model.Children.Count > 0) {
