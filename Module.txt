@@ -2,7 +2,7 @@ Name: BI Sitemap
 AntiForgery: enabled
 Author: WebAdvanced
 Website: https://github.com/BusinessIntegrations/Orchard-SiteMap
-Version: 2.0.247
+Version: 2.0.252
 OrchardVersion: 1.10.2
 Tags: Sitemap, SEO, Navigation
 Description: Provides a highly configurable XML and HTML sitemap. Modified by Business Integrations.

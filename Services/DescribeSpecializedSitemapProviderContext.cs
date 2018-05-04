@@ -18,6 +18,7 @@ namespace WebAdvanced.Sitemap.Services {
                 describeFor = new DescribeSpecializedSitemapFor(namespacePrefix);
                 Describes[namespacePrefix] = describeFor;
             }
+
             return describeFor;
         }
         #endregion

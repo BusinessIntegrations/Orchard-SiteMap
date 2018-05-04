@@ -11,18 +11,20 @@ namespace WebAdvanced.Sitemap {
             Name = "ManageSitemap"
         };
 
+        private static readonly Permission[] permissions = {ManageSitemap};
+
         #region IPermissionProvider Members
         public IEnumerable<PermissionStereotype> GetDefaultStereotypes() {
             return new[] {
                 new PermissionStereotype {
                     Name = "Administrator",
-                    Permissions = new[] {ManageSitemap}
+                    Permissions = permissions
                 }
             };
         }
 
         public IEnumerable<Permission> GetPermissions() {
-            return new[] {ManageSitemap};
+            return permissions;
         }
 
         public virtual Feature Feature { get; set; }

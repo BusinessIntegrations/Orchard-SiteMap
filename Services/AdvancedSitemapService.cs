@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Xml.Linq;
 using Orchard;
+using Orchard.Autoroute.Models;
 using Orchard.Caching;
 using Orchard.ContentManagement.MetaData;
 using Orchard.Data;
@@ -17,7 +18,8 @@ using WebAdvanced.Sitemap.Providers;
 using WebAdvanced.Sitemap.ViewModels;
 #endregion
 
-namespace WebAdvanced.Sitemap.Services {
+namespace WebAdvanced.Sitemap.Services
+{
     public class AdvancedSitemapService : IAdvancedSitemapService {
         private readonly ICacheManager _cacheManager;
         private readonly IClock _clock;
@@ -62,35 +64,18 @@ namespace WebAdvanced.Sitemap.Services {
             if (record != null) {
                 _customRouteRepository.Delete(record);
                 _customRouteRepository.Flush();
-                _signals.Trigger(Constants.TriggerCustomRoutes);
+                _signals.Trigger(Constants.CustomRouteSettingsCacheTrigger);
             }
         }
 
-        public IEnumerable<CustomRouteModel> GetCustomRoutes() {
-            return _cacheManager.Get("WebAdvanced.Sitemap.CustomRoutes",
+        public IEnumerable<ContentTypeRouteSettingsModel> GetContentTypeRouteSettings() {
+            const string autoroutePartName = nameof(AutoroutePart);
+            var settings = _cacheManager.Get(Constants.ContentTypeRouteSettingsCacheKey,
                 ctx => {
-                    ctx.Monitor(_signals.When(Constants.TriggerCustomRoutes));
-                    var records = _customRouteRepository.Table.ToList();
-                    return records.Select(r => new CustomRouteModel {
-                        IndexForDisplay = r.IndexForDisplay,
-                        IndexForXml = r.IndexForXml,
-                        Name = r.Url.Trim('/')
-                            .Split('/')[0]
-                            .SlugToTitle(),
-                        Priority = r.Priority,
-                        UpdateFrequency = r.UpdateFrequency ?? "weekly",
-                        Url = r.Url ?? string.Empty
-                    });
-                });
-        }
-
-        public IEnumerable<IndexSettingsModel> GetIndexSettings() {
-            var settings = _cacheManager.Get("WebAdvanced.Sitemap.IndexSettings",
-                ctx => {
-                    ctx.Monitor(_signals.When("ContentDefinitionManager"));
-                    ctx.Monitor(_signals.When(Constants.TriggerIndexSettings));
+                    ctx.Monitor(_signals.When(Constants.ContentDefinitionManagerCacheKey));
+                    ctx.Monitor(_signals.When(Constants.ContentTypeRouteSettingsCacheTrigger));
                     var contentTypes = _contentDefinitionManager.ListTypeDefinitions()
-                        .Where(ctd => ctd.Parts.FirstOrDefault(p => p.PartDefinition.Name == "AutoroutePart") != null)
+                        .Where(ctd => ctd.Parts.Any(p => p.PartDefinition.Name == autoroutePartName))
                         .ToList();
                     var typeNames = contentTypes.Select(t => t.Name)
                         .ToArray();
@@ -101,8 +86,9 @@ namespace WebAdvanced.Sitemap.Services {
                     foreach (var record in toDelete) {
                         _settingsRepository.Delete(record);
                     }
+
                     _settingsRepository.Flush();
-                    var contentSettings = new List<IndexSettingsModel>();
+                    var contentSettings = new List<ContentTypeRouteSettingsModel>();
                     foreach (var type in contentTypes) {
                         var type2 = type;
                         // Get the record, generate a new one if it doesn't exist.
@@ -114,11 +100,12 @@ namespace WebAdvanced.Sitemap.Services {
                                 IndexForDisplay = false,
                                 IndexForXml = false,
                                 Priority = 3,
-                                UpdateFrequency = "weekly"
+                                UpdateFrequency = Constants.WeeklyUpdateFrequency
                             };
                             _settingsRepository.Create(record);
                         }
-                        var model = new IndexSettingsModel {
+
+                        var model = new ContentTypeRouteSettingsModel {
                             DisplayName = type.DisplayName,
                             Name = type.Name,
                             IndexForDisplay = record.IndexForDisplay,
@@ -128,15 +115,34 @@ namespace WebAdvanced.Sitemap.Services {
                         };
                         contentSettings.Add(model);
                     }
+
                     return contentSettings;
                 });
             return settings;
         }
 
-        public IEnumerable<RouteSettingsModel> GetRoutes() {
-            return _cacheManager.Get("WebAdvanced.Sitemap.Routes",
+        public IEnumerable<CustomRouteSettingsModel> GetCustomRouteSettings() {
+            return _cacheManager.Get(Constants.CustomRouteSettingsCacheKey,
                 ctx => {
-                    ctx.Monitor(_signals.When(Constants.RefreshCache));
+                    ctx.Monitor(_signals.When(Constants.CustomRouteSettingsCacheTrigger));
+                    var records = _customRouteRepository.Table.ToList();
+                    return records.Select(r => new CustomRouteSettingsModel {
+                        IndexForDisplay = r.IndexForDisplay,
+                        IndexForXml = r.IndexForXml,
+                        Name = r.Url.Trim('/')
+                            .Split('/')[0]
+                            .SlugToTitle(),
+                        Priority = r.Priority,
+                        UpdateFrequency = r.UpdateFrequency ?? Constants.WeeklyUpdateFrequency,
+                        Url = r.Url ?? string.Empty
+                    });
+                });
+        }
+
+        public IEnumerable<DisplayRouteSettingsModel> GetDisplayRouteSettings() {
+            return _cacheManager.Get(Constants.DisplayRouteSettingsCacheKey,
+                ctx => {
+                    ctx.Monitor(_signals.When(Constants.DisplayRouteSettingsCacheTrigger));
                     var slugs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); // slug => Title (if available)
 
                     // Extract filtered routes from route providers
@@ -162,7 +168,8 @@ namespace WebAdvanced.Sitemap.Services {
                             }
                         }
                     }
-                    var routeModels = new List<RouteSettingsModel>();
+
+                    var routeModels = new List<DisplayRouteSettingsModel>();
                     var orderedSlugs = slugs.OrderByDescending(s => s.Value)
                         .ToList();
                     foreach (var pair in orderedSlugs) {
@@ -179,7 +186,8 @@ namespace WebAdvanced.Sitemap.Services {
                             };
                             _routeRepository.Create(route);
                         }
-                        var model = new RouteSettingsModel {
+
+                        var model = new DisplayRouteSettingsModel {
                             Active = route.Active,
                             DisplayColumn = route.DisplayColumn,
                             DisplayLevels = route.DisplayLevels,
@@ -190,21 +198,31 @@ namespace WebAdvanced.Sitemap.Services {
                         };
                         routeModels.Add(model);
                     }
+
                     return routeModels;
                 });
         }
 
+        /// <summary>
+        ///     Gets or creates cached Xml sitemap document
+        /// </summary>
+        /// <returns></returns>
         public XDocument GetSitemapDocument() {
-            return _cacheManager.Get("sitemap.xml", BuildSitemapDocument);
+            return _cacheManager.Get(Constants.XmlDocumentCacheKey, BuildSitemapDocument);
         }
 
+        /// <summary>
+        ///     Used by the HomeController to build the Sitemap page. The cache trigger for this data is also
+        ///     <see cref="Constants.DisplayRouteSettingsCacheTrigger" />.
+        /// </summary>
+        /// <returns></returns>
         public SitemapNode GetSitemapRoot() {
             // Create dictionary indexed by routes
-            var routeSettings = GetRoutes()
+            var routeSettings = GetDisplayRouteSettings()
                 .ToDictionary(k => k.Slug, v => v, StringComparer.OrdinalIgnoreCase);
-            var sitemapRoot = _cacheManager.Get("WebAdvanced.Sitemap.Root",
+            var sitemapRoot = _cacheManager.Get(Constants.SitemapNodeRootCacheKey,
                 ctx => {
-                    ctx.Monitor(_signals.When(Constants.RefreshCache));
+                    ctx.Monitor(_signals.When(Constants.DisplayRouteSettingsCacheTrigger));
                     var sitemap = new SitemapNode("Root");
                     foreach (var provider in _routeProviders.OrderByDescending(p => p.Priority)) {
                         var validRoutes = provider.GetDisplayRoutes()
@@ -224,6 +242,7 @@ namespace WebAdvanced.Sitemap.Services {
                                 slugs.Length > routeSetting.DisplayLevels) {
                                 continue;
                             }
+
                             var i = 0;
                             var currentNode = sitemap;
                             while (i < slugs.Length) {
@@ -248,55 +267,35 @@ namespace WebAdvanced.Sitemap.Services {
                                             .Title = item.Title;
                                     }
                                 }
+
                                 currentNode = currentNode.Children[slugs[i]];
                                 i++;
                             }
                         }
                     }
+
                     return sitemap;
                 });
             return sitemapRoot;
         }
 
-        public void SetCustomRoutes(IEnumerable<CustomRouteModel> routes) {
-            var existingRouteIds = new List<int>();
-            foreach (var model in routes) {
-                // Treat empty url as over-ride for root path
-                if (string.IsNullOrWhiteSpace(model.Url)) {
-                    model.Url = string.Empty;
-                }
-                var customRouteModel = model;
-                var record = _customRouteRepository.Fetch(q => q.Url == customRouteModel.Url)
-                    .FirstOrDefault();
-                if (record == null) {
-                    record = new SitemapCustomRouteRecord {
-                        IndexForDisplay = model.IndexForDisplay,
-                        IndexForXml = model.IndexForXml,
-                        Priority = model.Priority,
-                        Url = model.Url ?? string.Empty,
-                        UpdateFrequency = model.UpdateFrequency
-                    };
-                    _customRouteRepository.Create(record);
-                }
-                else {
-                    record.IndexForDisplay = model.IndexForDisplay;
-                    record.IndexForXml = model.IndexForXml;
-                    record.Priority = model.Priority;
-                    record.UpdateFrequency = model.UpdateFrequency;
-                    _customRouteRepository.Update(record);
-                }
-                existingRouteIds.Add(record.Id);
-            }
-            _customRouteRepository.Flush();
-            var toDelete = _customRouteRepository.Fetch(q => !existingRouteIds.Contains(q.Id));
-            foreach (var record in toDelete) {
-                _customRouteRepository.Delete(record);
-            }
-            _customRouteRepository.Flush();
-            _signals.Trigger(Constants.TriggerCustomRoutes);
+        /// <summary>
+        ///     Releases the xml document cache and the DisplayRoute Settings and the DisplayRoute Sitemap Node cache
+        /// </summary>
+        public void RefreshCache() {
+            _signals.Trigger(Constants.XmlDocumentCacheTrigger);
+            ReleaseDisplayRouteSettingsCache();
         }
 
-        public void SetIndexSettings(IEnumerable<IndexSettingsModel> settings) {
+        public void ReleaseDisplayRouteSettingsCache() {
+            _signals.Trigger(Constants.DisplayRouteSettingsCacheTrigger);
+        }
+
+        /// <summary>
+        ///     Applies changes to the ContentType routes defined on Indexing Tab
+        /// </summary>
+        /// <param name="settings"></param>
+        public void SetContentTypeRouteSettings(IEnumerable<ContentTypeRouteSettingsModel> settings) {
             foreach (var item in settings) {
                 var item1 = item;
                 var record = _settingsRepository.Fetch(q => q.ContentType == item1.Name)
@@ -319,10 +318,61 @@ namespace WebAdvanced.Sitemap.Services {
                     _settingsRepository.Update(record);
                 }
             }
-            _signals.Trigger(Constants.TriggerIndexSettings);
+
+            _signals.Trigger(Constants.ContentTypeRouteSettingsCacheTrigger);
         }
 
-        public void SetRoutes(IEnumerable<RouteSettingsModel> routes) {
+        /// <summary>
+        ///     Applies changes to the custom routes defined on Indexing Tab
+        /// </summary>
+        /// <param name="routes"></param>
+        public void SetCustomRouteSettings(IEnumerable<CustomRouteSettingsModel> routes) {
+            var existingRouteIds = new List<int>();
+            foreach (var model in routes) {
+                // Treat empty url as over-ride for root path
+                if (string.IsNullOrWhiteSpace(model.Url)) {
+                    model.Url = string.Empty;
+                }
+
+                var customRouteModel = model;
+                var record = _customRouteRepository.Fetch(q => q.Url == customRouteModel.Url)
+                    .FirstOrDefault();
+                if (record == null) {
+                    record = new SitemapCustomRouteRecord {
+                        IndexForDisplay = model.IndexForDisplay,
+                        IndexForXml = model.IndexForXml,
+                        Priority = model.Priority,
+                        Url = model.Url ?? string.Empty,
+                        UpdateFrequency = model.UpdateFrequency
+                    };
+                    _customRouteRepository.Create(record);
+                }
+                else {
+                    record.IndexForDisplay = model.IndexForDisplay;
+                    record.IndexForXml = model.IndexForXml;
+                    record.Priority = model.Priority;
+                    record.UpdateFrequency = model.UpdateFrequency;
+                    _customRouteRepository.Update(record);
+                }
+
+                existingRouteIds.Add(record.Id);
+            }
+
+            _customRouteRepository.Flush();
+            var toDelete = _customRouteRepository.Fetch(q => !existingRouteIds.Contains(q.Id));
+            foreach (var record in toDelete) {
+                _customRouteRepository.Delete(record);
+            }
+
+            _customRouteRepository.Flush();
+            _signals.Trigger(Constants.CustomRouteSettingsCacheTrigger);
+        }
+
+        /// <summary>
+        ///     Applies changes to the positioning of routes within the sitemap display page as defined on the Display Tab
+        /// </summary>
+        /// <param name="routes"></param>
+        public void SetDisplayRouteSettings(IEnumerable<DisplayRouteSettingsModel> routes) {
             foreach (var routeItem in routes) {
                 var item = routeItem;
                 var record = _routeRepository.Fetch(q => q.Id == item.Id)
@@ -335,25 +385,34 @@ namespace WebAdvanced.Sitemap.Services {
                     _routeRepository.Update(record);
                 }
             }
-            _signals.Trigger(Constants.RefreshCache);
+
+            ReleaseDisplayRouteSettingsCache();
             _routeRepository.Flush();
         }
         #endregion
 
         #region Methods
+        /// <summary>
+        ///     Builds the XML sitemap document based on all the urls supplied by each <see cref="ISitemapRouteProvider" />
+        ///     Document is cached for 1 hour, or when manually triggered using <see cref="Constants.XmlDocumentCacheTrigger" />
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
         private XDocument BuildSitemapDocument(AcquireContext<string> ctx) {
             ctx.Monitor(_clock.When(TimeSpan.FromHours(1.0)));
-            ctx.Monitor(_signals.When(Constants.RefreshXmlCache));
+            ctx.Monitor(_signals.When(Constants.XmlDocumentCacheTrigger));
             XNamespace xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9";
             var providerContext = new DescribeSpecializedSitemapProviderContext();
             foreach (var specializedSitemapProvider in _specializedSitemapProviders) {
                 specializedSitemapProvider.Describe(providerContext);
             }
+
             var document = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
             var urlset = new XElement(xmlns + "urlset");
             foreach (var specializedSitemapFor in providerContext.Describes.Values) {
                 urlset.Add(new XAttribute(XNamespace.Xmlns + specializedSitemapFor.NamespacePrefix, specializedSitemapFor.XNamespace));
             }
+
             document.Add(urlset);
             var rootUrl = GetRootPath();
             // rootUrl should always have a value at this point - but if it doesn't don't export relative URLs
@@ -372,6 +431,7 @@ namespace WebAdvanced.Sitemap.Services {
                         if (routeUrls.Contains(item.Url)) {
                             continue;
                         }
+
                         routeUrls.Add(item.Url);
                         items.Add(item);
                     }
@@ -384,36 +444,33 @@ namespace WebAdvanced.Sitemap.Services {
                     if (!Regex.IsMatch(item.Url, @"^\w+://.*$")) {
                         url = rootUrl + item.Url.TrimStart('/');
                     }
+
                     var element = new XElement(xmlns + "url");
                     element.Add(new XElement(xmlns + "loc", url));
                     element.Add(new XElement(xmlns + "changefreq", item.UpdateFrequency));
                     if (item.LastUpdated.HasValue) {
                         element.Add(new XElement(xmlns + "lastmod", item.LastUpdated.Value.ToString("yyyy-MM-dd")));
                     }
+
                     var priority = (item.Priority - 1) / 4.0;
                     if (priority >= 0.0 &&
                         priority <= 1.0) {
                         element.Add(new XElement(xmlns + "priority", (item.Priority - 1) / 4.0));
                     }
+
                     foreach (var specializedSitemapFor in providerContext.Describes.Values) {
                         var xElement = specializedSitemapFor.Process(item.ContentItem, item.Url);
                         if (xElement != null) {
                             element.Add(xElement);
                         }
                     }
+
                     urlset.Add(element);
                 }
             }
+
             return document;
         }
-
-        // Unused
-        //private IEnumerable<string> GetActiveDisplayContentTypes() {
-        //    return GetIndexSettings()
-        //        .Where(q => q.IndexForDisplay)
-        //        .Select(q => q.Name)
-        //        .ToList();
-        //}
 
         private string GetRootPath() {
             var urlHelper = new UrlHelper(_orchardServices.WorkContext.HttpContext.Request.RequestContext);
@@ -421,6 +478,7 @@ namespace WebAdvanced.Sitemap.Services {
             if (!baseUrl.EndsWith("/")) {
                 baseUrl += "/";
             }
+
             return baseUrl;
         }
         #endregion

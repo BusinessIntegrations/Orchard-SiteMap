@@ -1,5 +1,5 @@
 ﻿namespace WebAdvanced.Sitemap.ViewModels {
-    public class RouteSettingsModel {
+    public class DisplayRouteSettingsModel {
         #region Properties
         public bool Active { get; set; }
         public int DisplayColumn { get; set; }

@@ -23,11 +23,15 @@ namespace WebAdvanced.Sitemap.Controllers {
         #endregion
 
         #region Methods
+        /// <summary>
+        ///     Displays the sitemap page to end users.
+        /// </summary>
+        /// <returns></returns>
         [Themed]
         public ActionResult Index() {
             var root = _sitemapService.GetSitemapRoot();
             // Get Routes grouped by DisplayColumn
-            var groupedSettings = _sitemapService.GetRoutes()
+            var groupedSettings = _sitemapService.GetDisplayRouteSettings()
                 .Where(route => route.Active && route.Slug != null && root.Children.ContainsKey(route.Slug))
                 .GroupBy(route => route.DisplayColumn)
                 .OrderBy(gs => gs.Key);
@@ -39,11 +43,13 @@ namespace WebAdvanced.Sitemap.Controllers {
                 for (var empty = nextColumn; empty < grouping.Key; empty++) {
                     columnShapes.Add(Shape.Sitemap_Column(Groups: Enumerable.Empty<dynamic>()));
                 }
+
                 var groupShapes = grouping.OrderBy(gs => gs.Weight)
                     .Select(r => thisController.BuildGroupShape(root.Children[r.Slug]));
                 columnShapes.Add(Shape.Sitemap_Column(Groups: groupShapes));
                 nextColumn = grouping.Key + 1;
             }
+
             return new ShapeResult(this, Shape.Sitemap_Index(Columns: columnShapes));
         }
 

@@ -10,14 +10,16 @@ namespace WebAdvanced.Sitemap.Services {
     public interface IAdvancedSitemapService : IDependency {
         #region Methods
         void DeleteCustomRoute(string url);
-        IEnumerable<CustomRouteModel> GetCustomRoutes();
-        IEnumerable<IndexSettingsModel> GetIndexSettings();
-        IEnumerable<RouteSettingsModel> GetRoutes();
+        IEnumerable<ContentTypeRouteSettingsModel> GetContentTypeRouteSettings();
+        IEnumerable<CustomRouteSettingsModel> GetCustomRouteSettings();
+        IEnumerable<DisplayRouteSettingsModel> GetDisplayRouteSettings();
         XDocument GetSitemapDocument();
         SitemapNode GetSitemapRoot();
-        void SetCustomRoutes(IEnumerable<CustomRouteModel> settings);
-        void SetIndexSettings(IEnumerable<IndexSettingsModel> settings);
-        void SetRoutes(IEnumerable<RouteSettingsModel> settings);
+        void RefreshCache();
+        void ReleaseDisplayRouteSettingsCache();
+        void SetContentTypeRouteSettings(IEnumerable<ContentTypeRouteSettingsModel> settings);
+        void SetCustomRouteSettings(IEnumerable<CustomRouteSettingsModel> settings);
+        void SetDisplayRouteSettings(IEnumerable<DisplayRouteSettingsModel> settings);
         #endregion
     }
 }

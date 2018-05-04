@@ -9,6 +9,9 @@ using WebAdvanced.Sitemap.Models;
 #endregion
 
 namespace WebAdvanced.Sitemap.Providers.Impl {
+    /// <summary>
+    ///     Supplies routes based on ContentTypes
+    /// </summary>
     public class ContentRouteProvider : ISitemapRouteProvider {
         private readonly IContentManager _contentManager;
         private readonly IRepository<SitemapSettingsRecord> _sitemapSettings;

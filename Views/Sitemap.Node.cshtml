@@ -2,6 +2,7 @@
 @{
     var hasChildren = Model.Children.Count > 0;
 }
+
 @functions {
 
     static bool IsAbsolute(string url) {
@@ -9,6 +10,7 @@
     }
 
 }
+
 <li @(new MvcHtmlString(hasChildren
           ? "class=\"has-children\""
           : ""))>

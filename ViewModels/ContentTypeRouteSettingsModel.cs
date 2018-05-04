@@ -1,5 +1,5 @@
 ﻿namespace WebAdvanced.Sitemap.ViewModels {
-    public class IndexSettingsModel {
+    public class ContentTypeRouteSettingsModel {
         #region Properties
         public string DisplayName { get; set; }
         public bool IndexForDisplay { get; set; }

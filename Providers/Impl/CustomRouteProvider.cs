@@ -7,6 +7,9 @@ using WebAdvanced.Sitemap.Models;
 #endregion
 
 namespace WebAdvanced.Sitemap.Providers.Impl {
+    /// <summary>
+    ///     Supplies custom routes as defined in admin area
+    /// </summary>
     public class CustomRouteProvider : ISitemapRouteProvider {
         private readonly IRepository<SitemapCustomRouteRecord> _customRoutes;
 

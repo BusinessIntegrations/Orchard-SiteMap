@@ -25,6 +25,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,8 +85,9 @@
     <Compile Include="Providers\Impl\ContentRouteProvider.cs" />
     <Compile Include="Providers\Impl\CustomRouteProvider.cs" />
     <Compile Include="Providers\ISitemapRouteProvider.cs" />
-    <Compile Include="Recipes\Builders\SitemapStep.cs" />
-    <Compile Include="Recipes\Executors\SitemapStep.cs" />
+    <Compile Include="Recipes\Builders\SitemapExportStep.cs" />
+    <Compile Include="Recipes\Executors\SitemapImportStep.cs" />
+    <Compile Include="Recipes\RecipeConstants.cs" />
     <Compile Include="Routes.cs" />
     <Compile Include="Services\AdvancedSitemapService.cs" />
     <Compile Include="Services\DescribeSpecializedSitemapFor.cs" />
@@ -93,11 +95,11 @@
     <Compile Include="Services\IAdvancedSitemapService.cs" />
     <Compile Include="Services\ISitemapRouteFilter.cs" />
     <Compile Include="Services\ISpecializedSitemapProvider.cs" />
-    <Compile Include="ViewModels\CustomRouteModel.cs" />
+    <Compile Include="ViewModels\CustomRouteSettingsModel.cs" />
     <Compile Include="ViewModels\DisplaySettingsPageModel.cs" />
     <Compile Include="ViewModels\IndexingPageModel.cs" />
-    <Compile Include="ViewModels\IndexSettingsModel.cs" />
-    <Compile Include="ViewModels\RouteSettingsModel.cs" />
+    <Compile Include="ViewModels\ContentTypeRouteSettingsModel.cs" />
+    <Compile Include="ViewModels\DisplayRouteSettingsModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets.json" />
@@ -142,9 +144,9 @@
     <Content Include="Views\Admin\DisplaySettings.cshtml" />
     <Content Include="Views\Admin\Indexing.cshtml" />
     <Content Include="Views\Admin\PartialCustomRouteEditor.cshtml" />
-    <Content Include="Views\DisplayTemplates\RouteSettingsModel.cshtml" />
-    <Content Include="Views\EditorTemplates\CustomRouteModel.cshtml" />
-    <Content Include="Views\EditorTemplates\IndexSettingsModel.cshtml" />
+    <Content Include="Views\DisplayTemplates\DisplayRouteSettingsModel.cshtml" />
+    <Content Include="Views\EditorTemplates\CustomRouteSettingsModel.cshtml" />
+    <Content Include="Views\EditorTemplates\ContentTypeRouteSettingsModel.cshtml" />
     <Content Include="Views\Sitemap.Column.cshtml" />
     <Content Include="Views\Sitemap.Group.cshtml" />
     <Content Include="Views\Sitemap.Index.cshtml" />

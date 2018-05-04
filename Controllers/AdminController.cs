@@ -38,14 +38,19 @@ namespace WebAdvanced.Sitemap.Controllers {
 
         #region Methods
         public ActionResult Cache() {
+            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T(Constants.NotAllowedToManageSitemap))) {
+                return new HttpUnauthorizedResult();
+            }
+
             return View();
         }
 
         public ActionResult DisplaySettings() {
-            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T("Not allowed to manage sitemap"))) {
+            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T(Constants.NotAllowedToManageSitemap))) {
                 return new HttpUnauthorizedResult();
             }
-            var routes = _sitemapService.GetRoutes();
+
+            var routes = _sitemapService.GetDisplayRouteSettings();
             var model = new DisplaySettingsPageModel {
                 AutoLayout = false,
                 Routes = routes.ToList()
@@ -55,32 +60,34 @@ namespace WebAdvanced.Sitemap.Controllers {
 
         [HttpPost]
         public ActionResult DisplaySettings(DisplaySettingsPageModel model) {
-            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T("Not allowed to manage sitemap"))) {
+            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T(Constants.NotAllowedToManageSitemap))) {
                 return new HttpUnauthorizedResult();
             }
-            _sitemapService.SetRoutes(model.Routes);
+
+            _sitemapService.SetDisplayRouteSettings(model.Routes);
             _services.Notifier.Add(NotifyType.Information, T("Saved Sitemap display layout"));
             return RedirectToAction("DisplaySettings");
         }
 
         public ActionResult GetNewCustomRouteForm() {
-            var emptyModel = new CustomRouteModel {
+            var emptyModel = new CustomRouteSettingsModel {
                 IndexForDisplay = false,
                 IndexForXml = false,
                 Name = string.Empty,
                 Priority = 3,
-                UpdateFrequency = "weekly",
+                UpdateFrequency = Constants.WeeklyUpdateFrequency,
                 Url = string.Empty
             };
             return PartialView("PartialCustomRouteEditor", emptyModel);
         }
 
         public ActionResult Indexing() {
-            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T("Not allowed to manage sitemap"))) {
+            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T(Constants.NotAllowedToManageSitemap))) {
                 return new HttpUnauthorizedResult();
             }
-            var typeSettings = _sitemapService.GetIndexSettings();
-            var customRoutes = _sitemapService.GetCustomRoutes();
+
+            var typeSettings = _sitemapService.GetContentTypeRouteSettings();
+            var customRoutes = _sitemapService.GetCustomRouteSettings();
             var model = new IndexingPageModel {
                 ContentTypeSettings = typeSettings.OrderBy(q => q.DisplayName)
                     .ToList(),
@@ -91,22 +98,27 @@ namespace WebAdvanced.Sitemap.Controllers {
 
         [HttpPost]
         public ActionResult Indexing(IndexingPageModel model) {
-            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T("Not allowed to manage sitemap"))) {
+            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T(Constants.NotAllowedToManageSitemap))) {
                 return new HttpUnauthorizedResult();
             }
+
             if (model.CustomRoutes == null) {
-                model.CustomRoutes = new List<CustomRouteModel>();
+                model.CustomRoutes = new List<CustomRouteSettingsModel>();
             }
-            _sitemapService.SetIndexSettings(model.ContentTypeSettings);
-            _sitemapService.SetCustomRoutes(model.CustomRoutes);
+
+            _sitemapService.SetContentTypeRouteSettings(model.ContentTypeSettings);
+            _sitemapService.SetCustomRouteSettings(model.CustomRoutes);
+            _sitemapService.ReleaseDisplayRouteSettingsCache();
             _services.Notifier.Add(NotifyType.Information, T("Saved Sitemap indexing settings"));
-            _signals.Trigger(Constants.RefreshCache);
             return RedirectToAction("Indexing");
         }
 
         public ActionResult RefreshCache() {
-            _signals.Trigger(Constants.RefreshXmlCache);
-            _signals.Trigger(Constants.RefreshCache);
+            if (!_services.Authorizer.Authorize(Permissions.ManageSitemap, T(Constants.NotAllowedToManageSitemap))) {
+                return new HttpUnauthorizedResult();
+            }
+
+            _sitemapService.RefreshCache();
             _notifier.Add(NotifyType.Information, T("Sitemap cache cleared"));
             return RedirectToAction("Indexing");
         }

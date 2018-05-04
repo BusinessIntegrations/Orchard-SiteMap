@@ -10,6 +10,7 @@ namespace WebAdvanced.Sitemap.Extensions {
             if (string.IsNullOrWhiteSpace(slug)) {
                 return string.Empty;
             }
+
             var parts = slug.Split('-');
             return string.Join(" ",
                 parts.Select(p => {
