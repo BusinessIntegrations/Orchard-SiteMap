@@ -15,3 +15,6 @@ A changelog is appended at the end of this file. Further information on our codi
    * Fixed empty columns to display correctly.
    * Code tidy
    * Update readme.md
+2. Code refactor 2018-05-04
+   * Renamed a number of methods and classes to apply come naming consistency as seemed a little muddled.
+   * Rationalised string constants, updated module version, updated placement info, general code tidy etc.
